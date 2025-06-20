@@ -8,15 +8,19 @@
     body { background: linear-gradient(to right, hotpink, cyan); font-family: Papyrus; color: lime; }
     img { border: 5px dashed red; animation: shake 0.3s infinite; }
     button { font-size: 22px; color: yellow; background: black; border: 4px dotted pink; }
-    @keyframes shake { 0% { transform: rotate(1deg); } 50% { transform: rotate(-1deg); } 100% { transform: rotate(1deg); } }
+    @keyframes shake {
+      0% { transform: rotate(1deg); }
+      50% { transform: rotate(-1deg); }
+      100% { transform: rotate(1deg); }
+    }
   </style>
 </head>
 <body>
   <div id="app">
     <h1>🐶 Dog of the Day (click to see again!)</h1>
-    <button @click="getDog">🎲 Random Dog</button>
+    <button type="button" @click="getDog">🎲 Random Dog</button>
     <p><strong>Meet {{ dogName }}</strong></p>
-    <img :src="dogImage" :alt="dogName" width="300" />
+    <img v-if="dogImage" :src="dogImage" :alt="dogName" width="300" />
   </div>
 
   <script>
