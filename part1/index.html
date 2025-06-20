@@ -2,42 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dog of the Day</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <style>
-    body { background: linear-gradient(to right, hotpink, cyan); font-family: Papyrus; color: lime; }
-    img { border: 5px dashed red; animation: shake 0.3s infinite; }
-    button { font-size: 22px; color: yellow; background: black; border: 4px dotted pink; }
-    @keyframes shake {
-      0% { transform: rotate(1deg); }
-      50% { transform: rotate(-1deg); }
-      100% { transform: rotate(1deg); }
+    body {
+      background: linear-gradient(to right, hotpink, cyan);
+      font-family: Comic Sans MS, cursive;
+      color: lime;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 3rem;
+      text-shadow: 2px 2px 5px black;
+    }
+    button {
+      background: yellow;
+      color: black;
+      border: 5px dotted red;
+      padding: 1rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    img {
+      width: 300px;
+      height: 300px;
+      border: 5px dashed red;
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
   <div id="app">
     <h1>🐶 Dog of the Day (click to see again!)</h1>
-    <button type="button" @click="getDog">🎲 Random Dog</button>
-    <p><strong>Meet {{ dogName }}</strong></p>
-    <img src="https://via.placeholder.com/300" alt="Dog of the day" width="300" v-if="dogImage" :src="dogImage" :alt="dogName" />
-
+    <button @click="getDog" type="button">🐾 Random Dog</button>
+    <p>* Meet Mr. Woofers (totally made up)</p>
+    <img
+      src="https://via.placeholder.com/300"
+      alt="Dog of the day"
+      :src="dogImage"
+      :alt="dogName"
+    />
   </div>
 
   <script>
     const { createApp } = Vue;
+
     createApp({
       data() {
         return {
           dogImage: '',
-          dogName: 'Mr. Woofers (totally made up)'
+          dogName: 'Dog of the day'
         };
       },
       methods: {
-        async getDog() {
-          const res = await fetch('https://dog.ceo/api/breeds/image/random');
-          const data = await res.json();
-          this.dogImage = data.message;
+        getDog() {
+          fetch('https://dog.ceo/api/breeds/image/random')
+            .then(res => res.json())
+            .then(data => {
+              this.dogImage = data.message;
+            });
         }
       },
       mounted() {
