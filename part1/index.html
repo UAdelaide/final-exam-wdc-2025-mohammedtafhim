@@ -39,7 +39,12 @@
     <h1>🐶 Dog of the Day (click to see again!)</h1>
     <button @click="getDog" type="button">🐾 Random Dog</button>
     <p>* Meet Mr. Woofers (totally made up)</p>
-    <img :src="dogImage || placeholder" :alt="dogName" />
+    <img
+      src="https://images.dog.ceo/breeds/hound-afghan/n02088094_1003.jpg"
+      alt="Dog of the day"
+      :src="dogImage || placeholder"
+      :alt="dogName"
+    />
   </div>
 
   <script>
@@ -59,6 +64,7 @@
             .then(response => response.json())
             .then(data => {
               this.dogImage = data.message
+              this.dogName = 'Dog from API'
             })
             .catch(err => {
               console.error('Failed to fetch image', err)
