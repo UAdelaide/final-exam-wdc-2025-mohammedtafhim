@@ -20,7 +20,8 @@
     <h1>🐶 Dog of the Day (click to see again!)</h1>
     <button type="button" @click="getDog">🎲 Random Dog</button>
     <p><strong>Meet {{ dogName }}</strong></p>
-    <img :src="dogImage || '#'" :alt="dogName || 'dog image'" width="300" />
+    <img v-if="dogImage" :src="dogImage" :alt="dogName || 'dog image'" width="300" />
+
 
   </div>
 
