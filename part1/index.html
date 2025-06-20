@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dog of the Day</title>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/vue@3"></script>
   <style>
     body {
       background: linear-gradient(to right, hotpink, cyan);
@@ -39,37 +39,36 @@
     <h1>🐶 Dog of the Day (click to see again!)</h1>
     <button @click="getDog" type="button">🐾 Random Dog</button>
     <p>* Meet Mr. Woofers (totally made up)</p>
-    <img
-      src="https://via.placeholder.com/300"
-      alt="Dog of the day"
-      :src="dogImage"
-      :alt="dogName"
-    />
+    <img :src="dogImage || placeholder" :alt="dogName" />
   </div>
 
   <script>
-    const { createApp } = Vue;
+    const { createApp } = Vue
 
     createApp({
       data() {
         return {
           dogImage: '',
-          dogName: 'Dog of the day'
-        };
+          dogName: 'Dog of the day',
+          placeholder: 'https://images.dog.ceo/breeds/hound-afghan/n02088094_1003.jpg'
+        }
       },
       methods: {
         getDog() {
           fetch('https://dog.ceo/api/breeds/image/random')
-            .then(res => res.json())
+            .then(response => response.json())
             .then(data => {
-              this.dogImage = data.message;
-            });
+              this.dogImage = data.message
+            })
+            .catch(err => {
+              console.error('Failed to fetch image', err)
+            })
         }
       },
       mounted() {
-        this.getDog();
+        this.getDog()
       }
-    }).mount('#app');
+    }).mount('#app')
   </script>
 </body>
 </html>
