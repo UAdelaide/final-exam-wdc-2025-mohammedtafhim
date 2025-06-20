@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dog of the Day</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body { background: linear-gradient(to right, hotpink, cyan); font-family: Papyrus; color: lime; }
+    img { border: 5px dashed red; animation: shake 0.3s infinite; }
+    button { font-size: 22px; color: yellow; background: black; border: 4px dotted pink; }
+    @keyframes shake { 0% { transform: rotate(1deg); } 50% { transform: rotate(-1deg); } 100% { transform: rotate(1deg); } }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>🐶 Dog of the Day (click to see again!)</h1>
+    <button @click="getDog">🎲 Random Dog</button>
+    <p><strong>Meet {{ dogName }}</strong></p>
+    <img :src="dogImage" :alt="dogName" width="300" />
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+    createApp({
+      data() {
+        return {
+          dogImage: '',
+          dogName: 'Mr. Woofers (totally made up)'
+        };
+      },
+      methods: {
+        async getDog() {
+          const res = await fetch('https://dog.ceo/api/breeds/image/random');
+          const data = await res.json();
+          this.dogImage = data.message;
+        }
+      },
+      mounted() {
+        this.getDog();
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
