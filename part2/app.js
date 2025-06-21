@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const mysql = require('mysql2');
-const argon2 = require('argon2');
 require('dotenv').config();
 
 const app = express();
@@ -21,8 +20,8 @@ app.use(session({
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '', // change if needed
-  database: 'dog_walking' // change if needed
+  password: '', // your MySQL password if any
+  database: 'dog_walking' // make sure this matches your database name
 });
 
 // Routes
@@ -32,32 +31,30 @@ app.use('/api/walks', walkRoutes);
 app.use('/api/users', userRoutes);
 
 // LOGIN route
-app.post('/login', async (req, res) => {
+app.post('/login', (req, res) => {
   const { username, password } = req.body;
   const query = 'SELECT * FROM Users WHERE username = ?';
 
-  db.query(query, [username], async (err, results) => {
+  db.query(query, [username], (err, results) => {
     if (err || results.length === 0) {
       return res.status(401).send('User not found');
     }
 
     const user = results[0];
-    try {
-      const valid = await argon2.verify(user.password_hash, password);
-      if (!valid) return res.status(401).send('Invalid password');
 
-      req.session.user = user;
+    // Plain password check (for fake hash like 'hashedpassword123')
+    if (user.password_hash !== password) {
+      return res.status(401).send('Incorrect password');
+    }
 
-      // Redirect based on role
-      if (user.role === 'owner') {
-        res.redirect('/owner-dashboard.html');
-      } else if (user.role === 'walker') {
-        res.redirect('/walker-dashboard.html');
-      } else {
-        res.status(403).send('Unknown role');
-      }
-    } catch (e) {
-      res.status(500).send('Login failed');
+    req.session.user = user;
+
+    if (user.role === 'owner') {
+      res.redirect('/owner-dashboard.html');
+    } else if (user.role === 'walker') {
+      res.redirect('/walker-dashboard.html');
+    } else {
+      res.status(403).send('Unknown role');
     }
   });
 });
