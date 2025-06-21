@@ -59,7 +59,7 @@ app.post('/login', (req, res) => {
 module.exports = app;
 // Logout route: destroys session and redirects to login
 app.get('/logout', (req, res) => {
-    req.session.destroy(err => {
+    req.session.destroy((err) => {
       if (err) {
         return res.status(500).send('Logout failed');
       }
