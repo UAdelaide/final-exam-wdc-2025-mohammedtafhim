@@ -114,10 +114,12 @@
         async function submitWalkRequest() {
           try {
             const res = await fetch('/api/walks', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(form.value)
-            });
+            method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(form.value),
+  credentials: 'include' // ✅ This sends the session cookie
+});
+
             const result = await res.json();
 
             if (!res.ok) throw new Error(result.error || 'Error submitting walk request');
