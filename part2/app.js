@@ -55,6 +55,23 @@ app.post('/login', (req, res) => {
 // const userRoutes = require('./routes/userRoutes');
 // app.use('/api/walks', walkRoutes);
 // app.use('/api/users', userRoutes);
+// Route to get dogs owned by the logged-in user (for dropdown list)
+app.get('/api/walks/mydogs', (req, res) => {
+    if (!req.session.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const ownerId = req.session.user.user_id;
+    const query = 'SELECT dog_id, name, size FROM Dogs WHERE owner_id = ?';
+
+    db.query(query, [ownerId], (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      res.json(results);
+    });
+  });
 
 
 module.exports = app;
