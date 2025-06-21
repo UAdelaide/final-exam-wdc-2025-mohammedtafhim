@@ -56,6 +56,7 @@ app.post('/login', (req, res) => {
 // app.use('/api/walks', walkRoutes);
 // app.use('/api/users', userRoutes);
 
+
 module.exports = app;
 // Logout route: destroys session and redirects to login
 app.get('/logout', (req, res) => {
