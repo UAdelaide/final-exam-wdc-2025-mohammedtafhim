@@ -115,10 +115,10 @@
           try {
             const res = await fetch('/api/walks', {
             method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(form.value),
-  credentials: 'include' // ✅ This sends the session cookie
-});
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(form.value),
+            credentials: 'include' // ✅ This sends the session cookie
+          });
 
             const result = await res.json();
 
