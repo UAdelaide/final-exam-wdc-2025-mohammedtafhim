@@ -53,6 +53,7 @@ app.post('/login', (req, res) => {
 
 // Route to get dogs owned by the logged-in user (for dropdown list)
 app.get('/api/walks', (req, res) => {
+  console.log('API /api/walks hit, session:', req.session.user);
   if (!req.session.user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
