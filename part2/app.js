@@ -65,7 +65,7 @@ app.get('/api/walks/mydogs', (req, res) => {
       return res.status(500).json({ error: 'Database error' });
     }
 
-    res.json(results);
+    return res.json(results);
   });
 });
 
@@ -90,9 +90,9 @@ app.get('/api/dogs', (req, res) => {
         return dog;
       }));
 
-      res.json(dogsWithPhotos);
+      return res.json(dogsWithPhotos);
     } catch (e) {
-      res.status(500).json({ error: 'Image fetch failed' });
+      return res.status(500).json({ error: 'Image fetch failed' });
     }
   });
 });
