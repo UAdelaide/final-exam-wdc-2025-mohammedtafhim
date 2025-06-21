@@ -72,6 +72,16 @@ app.get('/api/walks/mydogs', (req, res) => {
       res.json(results);
     });
   });
+// Route to get all dogs (used on homepage)
+app.get('/api/dogs', (req, res) => {
+  const query = 'SELECT * FROM Dogs';
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
 
 
 module.exports = app;
