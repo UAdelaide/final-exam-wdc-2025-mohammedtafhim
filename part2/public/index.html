@@ -38,9 +38,7 @@
         </thead>
         <tbody>
           <tr v-for="dog in dogs" :key="dog.dog_id">
-            <td>
-              <img :src="dog.image || 'https://via.placeholder.com/100'" alt="Dog Photo" class="img-thumbnail" style="width: 100px; height: 100px;">
-            </td>
+            <td><img :src="dog.image" alt="dog photo" width="100"></td>
             <td>{{ dog.name }}</td>
             <td>{{ dog.size }}</td>
             <td>{{ dog.owner_id }}</td>
@@ -63,6 +61,7 @@
             const res = await fetch('/api/dogs');
             const data = await res.json();
 
+            // For each dog, fetch an image
             for (let dog of data) {
               const imgRes = await fetch('https://dog.ceo/api/breeds/image/random');
               const imgData = await imgRes.json();
