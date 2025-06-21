@@ -1,9 +1,8 @@
+const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const mysql = require('mysql2');
-const express = require('express');
 const fetch = require('node-fetch');
-
 require('dotenv').config();
 
 const app = express();
@@ -22,8 +21,8 @@ app.use(session({
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '', // enter your MySQL password if needed
-  database: 'dog_walking' // your DB name
+  password: '',
+  database: 'dog_walking'
 });
 
 // LOGIN route
@@ -65,6 +64,7 @@ app.get('/api/walks/mydogs', (req, res) => {
     if (err) {
       return res.status(500).json({ error: 'Database error' });
     }
+
     res.json(results);
   });
 });
@@ -73,31 +73,27 @@ app.get('/api/walks/mydogs', (req, res) => {
 app.get('/api/dogs', (req, res) => {
   const query = 'SELECT * FROM Dogs';
 
-  db.query(query, (err, results) => {
+  db.query(query, async (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Database error' });
     }
 
-    // Process dog photos
-    const fetchDogPhotos = async () => {
-      try {
-        const dogsWithPhotos = await Promise.all(results.map(async (dog) => {
-          try {
-            const response = await fetch('https://dog.ceo/api/breeds/image/random');
-            const data = await response.json();
-            dog.photo = data.message;
-          } catch {
-            dog.photo = 'https://via.placeholder.com/100';
-          }
-          return dog;
-        }));
-        res.json(dogsWithPhotos);
-      } catch (e) {
-        res.status(500).json({ error: 'Image fetch failed' });
-      }
-    };
+    try {
+      const dogsWithPhotos = await Promise.all(results.map(async (dog) => {
+        try {
+          const response = await fetch('https://dog.ceo/api/breeds/image/random');
+          const data = await response.json();
+          dog.photo = data.message;
+        } catch {
+          dog.photo = 'https://via.placeholder.com/100';
+        }
+        return dog;
+      }));
 
-    fetchDogPhotos();
+      res.json(dogsWithPhotos);
+    } catch (e) {
+      res.status(500).json({ error: 'Image fetch failed' });
+    }
   });
 });
 
