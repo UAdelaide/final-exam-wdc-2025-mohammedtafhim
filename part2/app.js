@@ -71,6 +71,15 @@ app.get('/api/walks/mydogs', (req, res) => {
       res.json(results);
     });
   });
+  app.get('/api/dogs', (req, res) => {
+    db.query('SELECT * FROM Dogs', (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+      res.json(results);
+    });
+  });
+
 
 
 module.exports = app;
