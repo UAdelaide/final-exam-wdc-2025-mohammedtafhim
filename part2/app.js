@@ -72,13 +72,17 @@ app.get('/api/walks/mydogs', (req, res) => {
     });
   });
   app.get('/api/dogs', (req, res) => {
-    db.query('SELECT * FROM Dogs', (err, results) => {
+    const query = 'SELECT * FROM Dogs';
+  
+    db.query(query, (err, results) => {
       if (err) {
         return res.status(500).json({ error: 'Database error' });
       }
+  
       res.json(results);
     });
   });
+  
 
 
 
