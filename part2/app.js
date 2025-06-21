@@ -51,7 +51,7 @@ app.post('/login', (req, res) => {
   });
 });
 
-// Route to get dogs owned by the logged-in user (for dropdown list)
+// GET walk requests for current user (OWNER)
 app.get('/api/walks', (req, res) => {
   console.log('API /api/walks hit, session:', req.session.user);
   if (!req.session.user) {
@@ -76,8 +76,34 @@ app.get('/api/walks', (req, res) => {
   });
 });
 
+// POST new walk request
+app.post('/api/walks', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 
-// Route to get all dogs with random photos
+  const ownerId = req.session.user.user_id;
+  const { dog_id, requested_time, duration_minutes, location } = req.body;
+
+  if (!dog_id || !requested_time || !duration_minutes || !location) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const query = `
+    INSERT INTO WalkRequests (dog_id, requested_time, duration_minutes, location, status)
+    VALUES (?, ?, ?, ?, 'pending')
+  `;
+
+  db.query(query, [dog_id, requested_time, duration_minutes, location], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error while inserting walk request' });
+    }
+
+    res.json({ message: 'Walk request created successfully' });
+  });
+});
+
+// GET all dogs with random photo
 app.get('/api/dogs', (req, res) => {
   const query = 'SELECT * FROM Dogs';
 
@@ -105,7 +131,25 @@ app.get('/api/dogs', (req, res) => {
   });
 });
 
-// Logout route
+// GET dogs owned by logged-in user
+app.get('/api/walks/mydogs', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const ownerId = req.session.user.user_id;
+  const query = 'SELECT dog_id, name, size FROM Dogs WHERE owner_id = ?';
+
+  db.query(query, [ownerId], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    res.json(results);
+  });
+});
+
+// LOGOUT
 app.get('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
