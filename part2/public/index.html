@@ -39,7 +39,8 @@
         <tbody>
           <tr v-for="dog in dogs" :key="dog.dog_id">
             <td>
-              <img :src="dog.photo" alt="Dog Photo" class="img-thumbnail" style="width: 100px; height: 100px;" src="https://via.placeholder.com/100">
+              <img :src="dog.image || 'https://via.placeholder.com/100'" alt="Dog Photo" class="img-thumbnail" style="width: 100px; height: 100px;">
+
 
               <span v-else>Loading...</span>
             </td>
