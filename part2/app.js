@@ -82,19 +82,22 @@ app.get('/api/dogs', (req, res) => {
   db.query(query, async (err, results) => {
     if (err) return res.status(500).json({ error: 'Database error' });
 
-    // Add photo to each dog
-    const dogsWithPhotos = await Promise.all(results.map(async dog => {
-      try {
-        const photoRes = await fetch('https://dog.ceo/api/breeds/image/random');
-        const photoData = await photoRes.json();
-        dog.photo = photoData.message;
-      } catch {
-        dog.photo = 'https://via.placeholder.com/100';
-      }
-      return dog;
-    }));
+    try {
+      const dogsWithPhotos = await Promise.all(results.map(async dog => {
+        try {
+          const photoRes = await fetch('https://dog.ceo/api/breeds/image/random');
+          const photoData = await photoRes.json();
+          dog.photo = photoData.message;
+        } catch {
+          dog.photo = 'https://via.placeholder.com/100';
+        }
+        return dog;
+      }));
 
-    res.json(dogsWithPhotos);
+      res.json(dogsWithPhotos);
+    } catch (e) {
+      res.status(500).json({ error: 'Failed to process dog images' });
+    }
   });
 });
 
