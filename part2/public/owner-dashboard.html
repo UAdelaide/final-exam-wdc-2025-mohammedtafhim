@@ -12,7 +12,6 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1 class="text-primary mb-0">Owner Dashboard</h1>
       <button type="button" @click="logout" class="btn btn-danger">Logout</button>
-
     </div>
 
     <!-- Walk request form -->
@@ -29,30 +28,33 @@
               </option>
             </select>
           </div>
-          <!-- Requested Date & Time -->
-            <div class="mb-3">
-  <label class="form-label">Requested Date & Time</label>
-  <input type="datetime-local" name="datetime" class="form-control" required>
-</div>
+
+          <!-- Fixed DateTime -->
+          <div class="mb-3">
+            <label class="form-label">Requested Date & Time</label>
+            <input v-model="form.requested_time" type="datetime-local" class="form-control" required>
+          </div>
 
           <div class="mb-3">
             <label class="form-label">Duration (minutes)</label>
             <input v-model="form.duration_minutes" type="number" class="form-control" required>
           </div>
+
           <div class="mb-3">
             <label class="form-label">Location</label>
             <input v-model="form.location" type="text" class="form-control" required>
           </div>
+
           <button type="submit" class="btn btn-success">Create Walk</button>
         </form>
       </div>
     </div>
 
-    <!-- Success or error messages -->
+    <!-- Messages -->
     <div v-if="message" class="alert alert-info">{{ message }}</div>
     <div v-if="error" class="alert alert-danger">{{ error }}</div>
 
-    <!-- List of walk requests -->
+    <!-- Walk Requests -->
     <h2 class="mb-3">My Walk Requests</h2>
     <div class="row" v-if="walks.length > 0">
       <div class="col-md-6 mb-4" v-for="walk in walks" :key="walk.request_id">
@@ -73,6 +75,7 @@
     <p v-else>No walk requests yet.</p>
   </div>
 
+  <!-- Vue Script -->
   <script>
     const { createApp, ref, onMounted } = Vue;
 
