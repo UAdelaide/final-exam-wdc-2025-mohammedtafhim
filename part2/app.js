@@ -1,8 +1,6 @@
-const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const mysql = require('mysql2');
-const fetch = require('node-fetch'); // For fetching dog.ceo API
 require('dotenv').config();
 
 const app = express();
@@ -21,11 +19,11 @@ app.use(session({
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '',
-  database: 'dog_walking'
+  password: '', // enter your MySQL password if needed
+  database: 'dog_walking' // your DB name
 });
 
-// Login route
+// LOGIN route
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   const query = 'SELECT * FROM Users WHERE username = ?';
@@ -51,63 +49,40 @@ app.post('/login', (req, res) => {
   });
 });
 
-// /api/users/me to get current user session
-app.get('/api/users/me', (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  res.json(req.session.user);
-});
-
-// /api/walks/mydogs to get dogs for dropdown
+// Other routes if needed
+// const walkRoutes = require('./routes/walkRoutes');
+// const userRoutes = require('./routes/userRoutes');
+// app.use('/api/walks', walkRoutes);
+// app.use('/api/users', userRoutes);
+// Route to get dogs owned by the logged-in user (for dropdown list)
 app.get('/api/walks/mydogs', (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const ownerId = req.session.user.user_id;
-  const query = 'SELECT dog_id, name, size FROM Dogs WHERE owner_id = ?';
-
-  db.query(query, [ownerId], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
+    if (!req.session.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
-    res.json(results);
+
+    const ownerId = req.session.user.user_id;
+    const query = 'SELECT dog_id, name, size FROM Dogs WHERE owner_id = ?';
+
+    db.query(query, [ownerId], (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      res.json(results);
+    });
   });
-});
 
-// /api/dogs for homepage dog table
-app.get('/api/dogs', (req, res) => {
-  const query = 'SELECT * FROM Dogs';
-  db.query(query, async (err, results) => {
-    if (err) return res.status(500).json({ error: 'Database error' });
-
-    try {
-      const dogsWithPhotos = await Promise.all(results.map(async dog => {
-        try {
-          const photoRes = await fetch('https://dog.ceo/api/breeds/image/random');
-          const photoData = await photoRes.json();
-          dog.photo = photoData.message;
-        } catch {
-          dog.photo = 'https://via.placeholder.com/100';
-        }
-        return dog;
-      }));
-
-      res.json(dogsWithPhotos);
-    } catch (e) {
-      res.status(500).json({ error: 'Failed to process dog images' });
-    }
-  });
-});
-
-// Logout route
-app.get('/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) return res.status(500).send('Logout failed');
-    res.clearCookie('connect.sid');
-    res.redirect('/');
-  });
-});
 
 module.exports = app;
+// Logout route: destroys session and redirects to login
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).send('Logout failed');
+      }
+      res.clearCookie('connect.sid'); // clears the session cookie
+      res.redirect('/');
+    });
+  });
+
+
