@@ -1,97 +1,96 @@
-const express = require('express');
-const path = require('path');
-const session = require('express-session');
-const mysql = require('mysql2');
-require('dotenv').config();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dog Walking Service</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body class="bg-light">
+  <div class="container py-5" id="app">
+    <h1 class="mb-4 text-primary">Welcome to the Dog Walking Service!</h1>
 
-const app = express();
+    <!-- Login Form -->
+    <form method="POST" action="/login" class="mb-5">
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '/public')));
-app.use(session({
-  secret: 'doggySecret123',
-  resave: false,
-  saveUninitialized: false
-}));
+    <!-- Dog Table -->
+    <h2 class="mb-3">Meet the Dogs!</h2>
+    <div v-if="dogs.length > 0">
+      <table class="table table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>Photo</th>
+            <th>Name</th>
+            <th>Size</th>
+            <th>Owner ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="dog in dogs" :key="dog.dog_id">
+            <td>
+              <img v-if="dog.image" :src="dog.image" alt="Dog Photo" class="img-thumbnail" style="width: 100px; height: 100px;">
+              <img v-else src="https://via.placeholder.com/100" alt="Placeholder" class="img-thumbnail" style="width: 100px; height: 100px;">
+            </td>
+            <td>{{ dog.name }}</td>
+            <td>{{ dog.size }}</td>
+            <td>{{ dog.owner_id }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p v-else>Loading dogs...</p>
+  </div>
 
-// DB connection
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '', // enter your MySQL password if needed
-  database: 'dog_walking' // your DB name
-});
+  <script>
+    const { createApp, ref, onMounted } = Vue;
 
-// LOGIN route
-app.post('/login', (req, res) => {
-  const { username, password } = req.body;
-  const query = 'SELECT * FROM Users WHERE username = ?';
+    createApp({
+      setup() {
+        const dogs = ref([]);
 
-  db.query(query, [username], (err, results) => {
-    if (err || results.length === 0) {
-      return res.status(401).send('User not found');
-    }
+        async function loadDogs() {
+          try {
+            const res = await fetch('/api/dogs');
+            const data = await res.json();
 
-    const user = results[0];
-    if (user.password_hash !== password) {
-      return res.status(401).send('Incorrect password');
-    }
+            for (let dog of data) {
+              try {
+                const imgRes = await fetch('https://dog.ceo/api/breeds/image/random');
+                const imgData = await imgRes.json();
+                dog.image = imgData.message;
+              } catch (err) {
+                dog.image = null;
+              }
+            }
 
-    req.session.user = user;
-    if (user.role === 'owner') {
-      res.redirect('/owner-dashboard.html');
-    } else if (user.role === 'walker') {
-      res.redirect('/walker-dashboard.html');
-    } else {
-      res.status(403).send('Unknown role');
-    }
-  });
-});
+            dogs.value = data;
+          } catch (err) {
+            console.error('Failed to load dogs:', err);
+          }
+        }
 
-// Other routes if needed
-// const walkRoutes = require('./routes/walkRoutes');
-// const userRoutes = require('./routes/userRoutes');
-// app.use('/api/walks', walkRoutes);
-// app.use('/api/users', userRoutes);
-// Route to get dogs owned by the logged-in user (for dropdown list)
-app.get('/api/walks/mydogs', (req, res) => {
-    if (!req.session.user) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+        onMounted(() => {
+          loadDogs();
+        });
 
-    const ownerId = req.session.user.user_id;
-    const query = 'SELECT dog_id, name, size FROM Dogs WHERE owner_id = ?';
-
-    db.query(query, [ownerId], (err, results) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
+        return {
+          dogs
+        };
       }
+    }).mount('#app');
+  </script>
 
-      res.json(results);
-    });
-  });
-// Route to get all dogs (used on homepage)
-app.get('/api/dogs', (req, res) => {
-  const query = 'SELECT * FROM Dogs';
-  db.query(query, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
-    }
-    res.json(results);
-  });
-});
-
-
-module.exports = app;
-// Logout route: destroys session and redirects to login
-app.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).send('Logout failed');
-      }
-      res.clearCookie('connect.sid'); // clears the session cookie
-      res.redirect('/');
-    });
-  });
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
