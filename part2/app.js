@@ -57,3 +57,13 @@ app.post('/login', (req, res) => {
 // app.use('/api/users', userRoutes);
 
 module.exports = app;
+// Logout route: destroys session and redirects to login
+app.get('/logout', (req, res) => {
+    req.session.destroy(err => {
+      if (err) {
+        return res.status(500).send('Logout failed');
+      }
+      res.clearCookie('connect.sid'); // clears the session cookie
+      res.redirect('/');
+    });
+  });
