@@ -52,22 +52,29 @@ app.post('/login', (req, res) => {
 });
 
 // Route to get dogs owned by the logged-in user (for dropdown list)
-app.get('/api/walks/mydogs', (req, res) => {
+app.get('/api/walks', (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const ownerId = req.session.user.user_id;
-  const query = 'SELECT dog_id, name, size FROM Dogs WHERE owner_id = ?';
+  const userId = req.session.user.user_id;
+  const query = `
+    SELECT WalkRequests.*, Dogs.name AS dog_name, Dogs.size
+    FROM WalkRequests
+    JOIN Dogs ON WalkRequests.dog_id = Dogs.dog_id
+    WHERE Dogs.owner_id = ?
+    ORDER BY WalkRequests.requested_time DESC
+  `;
 
-  db.query(query, [ownerId], (err, results) => {
+  db.query(query, [userId], (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Database error' });
     }
 
-    return res.json(results);
+    res.json(results);
   });
 });
+
 
 // Route to get all dogs with random photos
 app.get('/api/dogs', (req, res) => {
