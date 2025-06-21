@@ -52,68 +52,60 @@ app.post('/login', (req, res) => {
   });
 });
 
-// Other routes if needed
-// const walkRoutes = require('./routes/walkRoutes');
-// const userRoutes = require('./routes/userRoutes');
-// app.use('/api/walks', walkRoutes);
-// app.use('/api/users', userRoutes);
 // Route to get dogs owned by the logged-in user (for dropdown list)
 app.get('/api/walks/mydogs', (req, res) => {
-    if (!req.session.user) {
-      return res.status(401).json({ error: 'Unauthorized' });
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const ownerId = req.session.user.user_id;
+  const query = 'SELECT dog_id, name, size FROM Dogs WHERE owner_id = ?';
+
+  db.query(query, [ownerId], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
     }
 
-    const ownerId = req.session.user.user_id;
-    const query = 'SELECT dog_id, name, size FROM Dogs WHERE owner_id = ?';
-
-    db.query(query, [ownerId], (err, results) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
-      }
-
-      res.json(results);
-    });
+    res.json(results);
   });
-  app.get('/api/dogs', (req, res) => {
-    const query = 'SELECT * FROM Dogs';
+});
 
-    db.query(query, async (err, results) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
-      }
+app.get('/api/dogs', (req, res) => {
+  const query = 'SELECT * FROM Dogs';
 
-      try {
-        const dogsWithPhotos = await Promise.all(results.map(async (dog) => {
-          try {
-            const response = await fetch('https://dog.ceo/api/breeds/image/random');
-            const data = await response.json();
-            dog.photo = data.message;
-          } catch {
-            dog.photo = 'https://via.placeholder.com/100'; // fallback image
-          }
-          return dog;
-        }));
+  db.query(query, async (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
 
-        res.json(dogsWithPhotos);
-      } catch (e) {
-        res.status(500).json({ error: 'Image fetch failed' });
-      }
-    });
+    try {
+      const dogsWithPhotos = await Promise.all(results.map(async (dog) => {
+        try {
+          const response = await fetch('https://dog.ceo/api/breeds/image/random');
+          const data = await response.json();
+          dog.photo = data.message;
+        } catch {
+          dog.photo = 'https://via.placeholder.com/100'; // fallback image
+        }
+        return dog;
+      }));
+
+      res.json(dogsWithPhotos);
+    } catch (e) {
+      res.status(500).json({ error: 'Image fetch failed' });
+    }
   });
+});
 
-
-
-
-module.exports = app;
 // Logout route: destroys session and redirects to login
 app.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).send('Logout failed');
-      }
-      res.clearCookie('connect.sid'); // clears the session cookie
-      res.redirect('/');
-    });
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send('Logout failed');
+    }
+    res.clearCookie('connect.sid'); // clears the session cookie
+    res.redirect('/');
   });
+});
 
-
+module.exports = app;
